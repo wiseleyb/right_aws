@@ -76,7 +76,7 @@ module RightAws
 
     include RightAwsBaseInterface
 
-    API_VERSION      = "2010-03-01"  #"2009-04-02"
+    API_VERSION      = "2010-05-01"  #"2009-04-02"
     DEFAULT_HOST     = 'cloudfront.amazonaws.com'
     DEFAULT_PORT     = 443
     DEFAULT_PROTOCOL = 'https'
@@ -176,6 +176,7 @@ module RightAws
     end
 
     # see docs for create_distribution_by_config below
+    # TODO - this needs better doc
     def config_to_xml(config) # :nodoc:
       #config.requires!(:origin)
       origin = config[:origin]
@@ -243,6 +244,7 @@ module RightAws
         end
       end
 
+
       xml = <<-EOXML
         <?xml version="1.0" encoding="UTF-8"?>
         <#{streaming}DistributionConfig xmlns="#{xmlns}">
@@ -257,7 +259,6 @@ module RightAws
           #{enhanced_seek}
         </#{streaming}DistributionConfig>
       EOXML
-      puts xml
       return xml
     end
 
@@ -604,9 +605,11 @@ This is completely undocumented (as of 5/7/2010) but Amazon sent us (ben) this:
       url = "streaming-#{url}" if options[:streaming] == true
       link = generate_request('PUT', "#{url}/#{aws_id}/config", {}, config_to_xml(config),
                                      'If-Match' => config[:e_tag])
+      puts link.to_yaml
       request_info(link, RightHttp2xxParser.new(:logger => @logger))
     end
     def set_streaming_distribution_config(aws_id, config)
+      config[:streaming] = true
       set_distribution_config(aws_id, config, {:streaming => true})
     end
 
@@ -724,7 +727,7 @@ This is completely undocumented (as of 5/7/2010) but Amazon sent us (ben) this:
       end
 
       def self.url_safe(str)
-        str.gsub('+','-').gsub('=','_').gsub('/','~') #.gsub(/\n/,'').gsub(' ','')
+        str.gsub('+','-').gsub('=','_').gsub('/','~').gsub(/\n/,'').gsub(' ','')
       end
 
       def self.expires_to_i(e)
